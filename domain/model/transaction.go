@@ -27,13 +27,15 @@ type Transactions struct {
 }
 
 type Transaction struct {
-	Base							`valid:"required"`
-	AccountFrom				*Account `valid:"-"`
-	Ammount						float64 `json:"ammount" valid:"required"`
-	PixKeyTo					*PixKey `valid:"-"`
-	Status						string `json:"status" valid:"notnull"`
-	Description				string `json:"description" valid:"notnull"`
-	CancelDescription	string `json:"cancel_description" valid:"-"`
+	Base              `valid:"required"`
+	AccountFrom       *Account `valid:"-"`
+	AccountFromID     string   `gorm:"column:account_from_id;type:uuid;" valid:"notnull"`
+	Ammount            float64  `json:"amount" gorm:"type:float" valid:"notnull"`
+	PixKeyTo          *PixKey  `valid:"-"`
+	PixKeyIdTo        string   `gorm:"column:pix_key_id_to;type:uuid;" valid:"notnull"`
+	Status            string   `json:"status" gorm:"type:varchar(20)" valid:"notnull"`
+	Description       string   `json:"description" gorm:"type:varchar(255)" valid:"-"`
+	CancelDescription string   `json:"cancel_description" gorm:"type:varchar(255)" valid:"-"`
 }
 
 func (transAc *Transaction) isValid() error {
@@ -60,16 +62,22 @@ func (transAc *Transaction) isValid() error {
 }
 
 
-func newTransaction(accountFrom *Account, ammount float64, pixKeyTo *PixKey, description string) (*Transaction, error) {
+func NewTransaction(accountFrom *Account, ammount float64, pixKeyTo *PixKey, description string, id string) (*Transaction, error) {
 	transAc := Transaction{
-		AccountFrom: accountFrom,
-		Ammount: ammount,
-		PixKeyTo: pixKeyTo,
-		Description: description,
-		Status: TransactionPending,
+		AccountFrom:   accountFrom,
+		AccountFromID: accountFrom.ID,
+		Ammount:        ammount,
+		PixKeyTo:      pixKeyTo,
+		PixKeyIdTo:    pixKeyTo.ID,
+		Status:        TransactionPending,
+		Description:   description,
 	}
 
-	transAc.ID = uuid.NewV4().String()
+	if id == "" {
+		transAc.ID = uuid.NewV4().String()
+	} else {
+		transAc.ID = id
+	}
 	transAc.CreatedAt = time.Now()
 	transAc.UpdatedAt = time.Now()
 

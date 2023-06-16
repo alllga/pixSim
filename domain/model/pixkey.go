@@ -44,12 +44,13 @@ func (pixKey *PixKey) isValid() error {
 }
 
 
-func newPixKey(account *Account, key string, kind string) (*PixKey, error) {
+func NewPixKey(account *Account, key string, kind string) (*PixKey, error) {
 
 	pixKey := PixKey{
 		Kind: kind,
 		Key: key,
 		Account: account,
+		AccountId: account.ID,
 		Status: "active",
 	}
 
