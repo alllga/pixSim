@@ -1,0 +1,88 @@
+package repository
+
+import (
+	"fmt"
+
+	"github.com/alllga/pixSim/domain/model"
+	"github.com/jinzhu/gorm"
+)
+
+// type PixKeyRepositoryInterface interface {
+// 	RegisterKey(pixKey *PixKey) (*PixKey, error)
+// 	FindKeyByKind(key string, kind string) (*PixKey, error)
+// 	AddBank(bank *Bank) error
+// 	AddAccount(account *Account) error
+// 	FindAccount(account *Account) (*Account, error)
+// }
+
+type PixKeyRepositoryDb struct {
+	Db *gorm.DB
+
+}
+
+func (repo PixKeyRepositoryDb) AddBank(bank *model.Bank) error {
+	err := repo.Db.Create(bank).Error
+	if err != nil { 
+		return err
+	}
+
+	return nil
+}
+
+func (repo PixKeyRepositoryDb) AddAccount(account *model.Account) error {
+	err := repo.Db.Create(account).Error
+	if err != nil { 
+		return err
+	}
+
+	return nil
+}
+
+func (repo PixKeyRepositoryDb) RegisterKey(key *model.PixKey) error {
+	err := repo.Db.Create(key).Error
+	if err != nil { 
+		return err
+	}
+
+	return nil
+}
+
+func (repo PixKeyRepositoryDb) FindKeyByKind(key string, kind string) (*model.PixKey, error) {
+	var pixKey model.PixKey
+
+	repo.Db.Preload("Account.Bank").First(&pixKey, "kind = ? and key = ?", kind, key)
+
+	if pixKey.ID == "" {
+		return nil, fmt.Errorf("no key was found")
+	}
+
+	return &pixKey, nil
+
+}
+
+func (repo PixKeyRepositoryDb) FindAccount(id string) (*model.Account, error) {
+	var account model.Account
+
+	repo.Db.Preload("Bank").First(&account, "id = ?", id)
+
+	if account.ID == "" {
+		return nil, fmt.Errorf("no account found")
+	}
+
+	return &account, nil
+
+}
+
+func (repo PixKeyRepositoryDb) FindBank(id string) (*model.Bank, error) {
+	var bank model.Bank
+
+	repo.Db.First(&bank, "id = ?", id)
+
+	if bank.ID == "" {
+		return nil, fmt.Errorf("no bank was found")
+	}
+
+	return &bank, nil
+
+}
+	
