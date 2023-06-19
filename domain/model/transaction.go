@@ -99,7 +99,7 @@ func (transAc *Transaction) Complete()  error {
 func (transAc *Transaction) Cancel(description string)  error {
 	transAc.Status = TransactionError
 	transAc.UpdatedAt = time.Now()
-	transAc.Description = description
+	transAc.CancelDescription = description
 	err := transAc.isValid()
 	return err
 }
