@@ -13,7 +13,7 @@ type PixKeyRepositoryInterface interface {
 	FindKeyByKind(key string, kind string) (*PixKey, error)
 	AddBank(bank *Bank) error
 	AddAccount(account *Account) error
-	FindAccount(account *Account) (*Account, error)
+	FindAccount(id string) (*Account, error)
 }
 
 type PixKey struct {
