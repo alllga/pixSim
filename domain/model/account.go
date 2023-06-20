@@ -23,7 +23,7 @@ func (account *Account) isValid() error {
 	if err != nil {
 		return err
 	}
-
+	
 	return nil
 }
 
