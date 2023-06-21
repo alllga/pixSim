@@ -3,6 +3,8 @@ package kafka
 import (
 	"fmt"
 
+	"github.com/alllga/pixSim/application/factory"
+	appmodel "github.com/alllga/pixSim/application/model"
 	ckafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/jinzhu/gorm"
 )
@@ -40,12 +42,51 @@ func (kProc *KafkaProcessor) Consume() {
 	consumer.SubscribeTopics(topics, nil)
 
 	fmt.Println("kafka consumer has been started")
-	
+
 	for {
 		msg, err := consumer.ReadMessage(-1)
 		if err == nil {
-			fmt.Println(string(msg.Value))
+			kProc.processMessage(msg)
 		}
 	}
+
+}
+
+func (kProc *KafkaProcessor) processMessage(msg *ckafka.Message) {
+	transactionTopic := "transations"
+	transactionConfirmationTopic := "transaction_confirmation"
+
+	switch topic := *&msg.TopicPartition.Topic; topic {
+	case transactionTopic:
+		kProc.processTransaction(msg)
+	case transactionConfirmationTopic:
+	default:
+		fmt.Println("not a valid topic!", string(msg.Value))
+	}
+}
+
+func (kProc *KafkaProcessor) processTransaction(msg *ckafka.Message) error {
+	transation := appmodel.NewTransaction()
+	err := transation.ParseJson(msg.Value)
+	if err != nil {
+		return err
+	}
+
+	transationUseCase := factory.TransactionUseCaseFactory(kProc.Database)
+
+	createdTransaction, err := transationUseCase.Register(
+		transation.AccountID,
+		transation.Amount,
+		transation.PixKeyTo,
+		transation.PixKeyKindTo,
+		transation.Description,
+	)
+	if err != nil {
+		fmt.Println("error registering transaction")
+		return err
+	}
+
+	topic := "bank"+createdTransaction.PixKeyTo.Account.Bank.Code
+	transaction.ID = createdTransaction.ID
 
 }
