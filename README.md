@@ -1,4 +1,4 @@
-# CodePix
+# PixSim
 
 - Projeto feito em conjunto com o [Imersão FullCycle][linkF3]
 
@@ -20,5 +20,12 @@
   - Golang
   - gRPC
   - Apache Kafka
+
+## Rodando o Projeto Localmente
+
+- Para que você consiga rodar o projeto na sua máquina, é necessário:
+  - 1.  rodar um `docker compose up` na pasta apacheKafka e pixSim -
+  - 2.  É necessário ter `127.0.0.1 host.docker.internal` como uma opção de comunicação para que os containers possam se comunicar entre si. No linux isso fica em /etc/hosts e para Windows o caminho é C:\Windows\system32\drivers\etc\hosts
+  - 3. Para iniciar o servidor do pixSim, após o container estar ligado, `docker exec -it pixsim_app bash` e então `go run cmd/codepix/main.go`
 
 [linkF3]: https://github.com/codeedu/imersao-fullstack-fullcycle
